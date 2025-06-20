@@ -1,0 +1,3 @@
+UPDATE CURRENT_ROUND
+SET ROUND_ID = 1, 
+    season = 2025;
