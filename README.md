@@ -1,6 +1,17 @@
-# fpg_db_deploy
-This repo will handle the database changes for fpg database
+# FPG DB Deploy
 
+This repo will handle the database changes for FPG database
 
-yoyo list - this will show you what code is going to get applied
-yoyo apply - this will deploy your code to the defined DB. 
+## USefull Commands
+
+### List file status
+
+```
+uv run yoyo list
+```
+
+### Apply files to DB
+
+```
+uv run yoyo apply
+```
