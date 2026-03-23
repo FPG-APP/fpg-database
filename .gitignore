@@ -175,3 +175,5 @@ cython_debug/
 
 yoyo.ini
 migrations/populate_dev.sql
+
+.vscode/*
