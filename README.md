@@ -15,3 +15,9 @@ uv run yoyo list
 ```
 uv run yoyo apply
 ```
+
+### to back populate Dev run
+
+```
+uv run yoyo reapply --revision populate_dev
+```
