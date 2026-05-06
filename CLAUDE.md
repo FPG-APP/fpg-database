@@ -46,4 +46,4 @@ Credentials are injected via GitHub environment secrets; the action generates `y
 
 ## Package Manager
 
-Uses `uv` locally (`uv run yoyo ...`). The GitHub Action currently installs via `poetry` — if you update dependencies, you may need to align both.
+Uses `uv` everywhere — locally and in CI. The GitHub Action installs uv via `astral-sh/setup-uv` and runs `uv sync --locked` before applying migrations. When updating dependencies, run `uv add <package>` locally and commit the updated `uv.lock`.

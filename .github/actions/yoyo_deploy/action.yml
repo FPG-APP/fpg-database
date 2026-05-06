@@ -16,22 +16,27 @@ inputs:
     description: The password for the database
     required: true
 
-runs: 
+runs:
   using: "composite"
   steps:
-    - run: |
-        pip install poetry
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: "3.11"
 
-        poetry install --no-root
+    - name: Install dependencies
+      run: uv sync --locked
+      shell: bash
 
+    - name: Deploy migrations
+      run: |
         echo "[DEFAULT]" > yoyo.ini
         echo "sources = migrations migrations/TABLES" >> yoyo.ini
         echo "batch_mode = on" >> yoyo.ini
         echo "verbosity = 2" >> yoyo.ini
-        echo "database = mysql://${{ inputs.USERNAME }}:${{ inputs.PASSWORD }}@${{ inputs.HOST }}/${{ inputs.DATABASE }}" >> yoyo.ini
-        
-        poetry run yoyo list
+        echo "database = mysql://${{ inputs.username }}:${{ inputs.password }}@${{ inputs.host }}/${{ inputs.database }}" >> yoyo.ini
 
-        poetry run yoyo apply
-      id: yoyo-deploy
+        uv run yoyo list
+
+        uv run yoyo apply
       shell: bash
