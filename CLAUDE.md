@@ -102,6 +102,4 @@ No manual `kubectl` or SSH steps — pushing to the right branch is the deploy.
 
 ## Dependencies
 
-- Python ≥ 3.11
-- `yoyo-migrations` ≥ 9
-- `pymysql` ≥ 1.1
+Uses `uv` everywhere — locally and in CI. The GitHub Action installs uv via `astral-sh/setup-uv` and runs `uv sync --locked` before applying migrations. When updating dependencies, run `uv add <package>` locally and commit the updated `uv.lock`.
