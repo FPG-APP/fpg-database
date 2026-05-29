@@ -1,4 +1,4 @@
--- depends: ADD_COLS_STANDINGS
+-- depends: mini_league_standings
 
 CREATE TABLE MCP_TOKENS (
     id              INT PRIMARY KEY AUTO_INCREMENT,

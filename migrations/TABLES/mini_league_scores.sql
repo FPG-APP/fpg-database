@@ -1,3 +1,5 @@
+-- depends: mini_league_members
+
 CREATE TABLE IF NOT EXISTS MINI_LEAGUE_SCORES (
     LEAGUE_ID      INT  NOT NULL,
     PLAYER_ID      INT  NOT NULL,

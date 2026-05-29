@@ -1,4 +1,4 @@
--- depends: ADD_PK_FIXTURES
+-- depends: ADD_FK_CHOICES_PLAYERS
 
 ALTER TABLE RESULTS
   ADD CONSTRAINT fk_results_fixture_id

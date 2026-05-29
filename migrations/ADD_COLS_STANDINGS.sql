@@ -1,4 +1,4 @@
--- depends: standings
+-- depends: ADD_SUPP_INDEX
 
 -- Rename OVERALL_TOTAL → SCORE to match the API field name
 ALTER TABLE STANDINGS

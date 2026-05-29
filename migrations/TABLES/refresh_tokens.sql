@@ -1,3 +1,5 @@
+-- depends: password_reset_tokens
+
 CREATE TABLE IF NOT EXISTS REFRESH_TOKENS (
     id          INT PRIMARY KEY AUTO_INCREMENT,
     player_id   INT NOT NULL,

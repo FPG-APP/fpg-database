@@ -1,3 +1,5 @@
+-- depends: ADD_COLS_STANDINGS
+
 CREATE TABLE IF NOT EXISTS MINI_LEAGUE_STANDINGS (
     LEAGUE_ID           INT         NOT NULL,
     PLAYER_ID           INT         NOT NULL,

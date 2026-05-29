@@ -1,4 +1,4 @@
--- depends: ADD_PK_USERS
+-- depends: ADD_FK_RESULTS_FIXTURES
 
 ALTER TABLE SCORES
   ADD CONSTRAINT fk_scores_user_id
