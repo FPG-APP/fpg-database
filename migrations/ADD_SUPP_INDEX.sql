@@ -1,4 +1,4 @@
--- depends: ADD_FK_SCORES_PLAYERS
+-- depends: DROP_FK_CHOICES_SCORES_PLAYERS
 
 CREATE INDEX idx_choices_round_season
   ON CHOICES (ROUND, SEASON);
