@@ -1,4 +1,4 @@
---depends: ADD_PK_USERS
+-- depends: ADD_UNIQUE_USERS_USERNAME
 
 ALTER TABLE CHOICES
   ADD CONSTRAINT fk_choices_player_id

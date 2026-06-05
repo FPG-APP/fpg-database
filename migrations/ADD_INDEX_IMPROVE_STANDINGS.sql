@@ -1,3 +1,5 @@
+-- depends: standings
+
 ALTER TABLE RESULTS  ADD INDEX idx_results_season_status (season, game_status);
 ALTER TABLE CHOICES  ADD INDEX idx_choices_season_player (season, player_id);
 ALTER TABLE FIXTURES ADD INDEX idx_fixtures_season (season);

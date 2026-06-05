@@ -1,3 +1,5 @@
+-- depends: ADD_UNIQUE_USERS_EMAIL
+
 UPDATE USERS SET USERNAME = TRIM(USERNAME) WHERE USERNAME IS NOT NULL;
 
 -- Convert empty strings to NULL — UNIQUE indexes allow multiple NULLs in MariaDB

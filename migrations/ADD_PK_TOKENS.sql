@@ -1,3 +1,5 @@
+-- depends: ADD_PK_TEAMS
+
 ALTER TABLE TOKENS
   MODIFY COLUMN token VARCHAR(100) NOT NULL,
   ADD PRIMARY KEY (player_id, token);
