@@ -1,0 +1,4 @@
+-- depends: mini_league_scores
+
+ALTER TABLE USERS
+    ADD COLUMN EMAIL_OPT_OUT TINYINT(1) NOT NULL DEFAULT 0;

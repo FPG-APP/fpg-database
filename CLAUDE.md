@@ -1,19 +1,26 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working in this repository.
 
-## Purpose
+## What this repo does
 
-Manages database schema for the FPG MySQL database using [Yoyo Migrations](https://ollycope.com/software/yoyo/latest/). All schema changes are expressed as SQL migration files.
+Manages the schema of the FPG MySQL database via [Yoyo Migrations](https://ollycope.com/software/yoyo/latest/). All schema changes are plain SQL files, tracked and applied by Yoyo, deployed automatically through GitHub Actions on push to `develop` or `main`.
+
+Currently holds **47 schema-change migrations** in `migrations/` and **21 table-creation migrations** in `migrations/TABLES/`.
 
 ## Commands
 
 ```bash
-uv run yoyo list    # show migration status (applied / pending)
-uv run yoyo apply   # apply all pending migrations
+uv run yoyo list                              # show applied / pending migrations
+uv run yoyo apply                             # apply all pending migrations
+uv run yoyo reapply --revision <migration>    # re-run a specific migration (e.g. for a data backfill)
 ```
 
-`yoyo.ini` is gitignored (contains dev credentials). Create it locally:
+`uv` is the package manager — used locally and in CI. After dependency changes, `uv add <pkg>` then commit `uv.lock`.
+
+## Configuration
+
+`yoyo.ini` is gitignored (it holds connection credentials). Create it locally before running any command:
 
 ```ini
 [DEFAULT]
@@ -23,27 +30,76 @@ batch_mode = off
 verbosity = 2
 ```
 
-## Migration Authoring
+CI sets `batch_mode = on` so deployments are atomic.
 
-- Place new migrations in `migrations/` (or `migrations/TABLES/` for net-new tables)
-- Use `-- depends: <migration_name>` at the top of a file to enforce ordering rather than relying on alphabetical sort
-- Yoyo tracks applied migrations in a `_yoyo_migration` table automatically
-- CI runs with `batch_mode = on` (atomic); local dev uses `batch_mode = off`
+## Layout
 
-## Schema Overview
+```
+.
+├── migrations/             # 47 ALTER / index / FK / constraint migrations
+│   └── TABLES/             # 21 CREATE TABLE migrations
+├── .github/
+│   ├── workflows/
+│   │   ├── deploy_db_testing.yml   # runs on push to develop
+│   │   └── deploy_db_prod.yml      # runs on push to main
+│   └── actions/yoyo_deploy/        # composite action shared by both workflows
+├── pyproject.toml
+├── uv.lock
+└── README.md
+```
 
-Core tables: `USERS`, `PLAYERS`, `TEAMS`, `FIXTURES`, `RESULTS`, `ROUNDS`, `CURRENT_ROUND`, `CHOICES`, `SCORES`, `STANDINGS`, `TOKENS`, `LOGS`, `CALL_LOGS`, `NOTIFICATION_LOGS`.
+## Authoring a migration
 
-Most tables have a `SEASON` column (integer year) added via migration to support multi-season data isolation. Player IDs start at 4001 via `SEQ_PLAYER_IDS`.
+- Schema changes go in `migrations/`.
+- Brand-new tables go in `migrations/TABLES/`.
+- Filenames are descriptive (no dates or sequence numbers) — e.g. `ADD_COL_ACTIVE_TO_TOKENS.sql`, `CREATE_TABLE_LEAGUES.sql`.
+- Use a `-- depends:` header line to enforce ordering instead of relying on alphabetical sort. Example:
+
+  ```sql
+  -- depends: ADD_COL_CREATED_AT_TO_TOKENS
+
+  ALTER TABLE TOKENS ADD COLUMN ACTIVE TINYINT(1) DEFAULT 1;
+  ```
+
+- Yoyo records applied migrations in a `_yoyo_migration` table; do not edit that table by hand.
+
+## Schema overview
+
+The core domain tables are:
+
+| Table | What it holds |
+|---|---|
+| `USERS` | Auth + profile (email, hashed password, username, full name, etc.) |
+| `PLAYERS` | Game-side player metadata (player_id, joined-season, etc.) |
+| `TEAMS` | Premier League teams |
+| `FIXTURES` | Per-round match schedule |
+| `RESULTS` | Per-round match results (A / B / draw) |
+| `ROUNDS` | Round metadata, including DP (double points) and DMM (draw means more) flags |
+| `CURRENT_ROUND` | Singleton: current active round + season |
+| `CHOICES` | A player's pick for a given round |
+| `SCORES` | A player's score for a given round |
+| `STANDINGS` | Aggregated season standings |
+| `LEAGUES` / `LEAGUE_MEMBERS` | Mini-league membership |
+| `TOKENS` | Refresh-token storage + push-notification tokens |
+| `CALL_LOGS` / `NOTIFICATION_LOGS` / `LOGS` / `ERROR_LOGS` | Operational logs |
+
+Most tables carry a `SEASON` column (integer year) for multi-season isolation. New player IDs are issued from the `SEQ_PLAYER_IDS` sequence (starts at 4001).
 
 ## Deployment
 
-GitHub Actions handle deployments automatically:
-- Push to `develop` → deploys to testing environment
-- Push to `main` → deploys to production
+| Branch | Workflow | Target |
+|---|---|---|
+| `develop` | `deploy_db_testing.yml` | testing DB |
+| `main` | `deploy_db_prod.yml` | production DB |
 
-Credentials are injected via GitHub environment secrets; the action generates `yoyo.ini` at runtime.
+Both wrap the composite action in `.github/actions/yoyo_deploy/`, which:
+1. Installs `uv` via `astral-sh/setup-uv`.
+2. Runs `uv sync --locked`.
+3. Generates `yoyo.ini` from the workflow's env (host / db / user / password injected from GitHub secrets and vars).
+4. Runs `uv run yoyo list` (visibility) then `uv run yoyo apply` with `batch_mode = on`.
 
-## Package Manager
+No manual `kubectl` or SSH steps — pushing to the right branch is the deploy.
 
-Uses `uv` locally (`uv run yoyo ...`). The GitHub Action currently installs via `poetry` — if you update dependencies, you may need to align both.
+## Dependencies
+
+Uses `uv` everywhere — locally and in CI. The GitHub Action installs uv via `astral-sh/setup-uv` and runs `uv sync --locked` before applying migrations. When updating dependencies, run `uv add <package>` locally and commit the updated `uv.lock`.
